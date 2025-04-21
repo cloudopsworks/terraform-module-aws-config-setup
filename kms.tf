@@ -77,11 +77,11 @@ data "aws_iam_policy_document" "config_kms" {
 resource "aws_kms_key" "config" {
   count                   = var.is_hub ? 1 : 0
   description             = "KMS key for AWS Config"
-  deletion_window_in_days = 15
-  rotation_period_in_days = 90
+  deletion_window_in_days = try(var.settings.kms.deletion_window, 15)
+  rotation_period_in_days = try(var.settings.kms.rotation_period, 90)
   enable_key_rotation     = true
   is_enabled              = true
-  multi_region            = true
+  multi_region            = try(var.settings.kms.multi_region, false)
   key_usage               = "ENCRYPT_DECRYPT"
   tags                    = local.all_tags
 }
