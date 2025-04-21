@@ -18,6 +18,7 @@ resource "aws_config_configuration_recorder" "this" {
 resource "aws_config_delivery_channel" "this" {
   name           = local.clean_name
   s3_bucket_name = module.config_bucket.s3_bucket_id
+  s3_key_prefix = "/"
   s3_kms_key_arn = aws_kms_key.config.arn
   sns_topic_arn  = aws_sns_topic.config_sns.arn
   snapshot_delivery_properties {
