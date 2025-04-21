@@ -91,11 +91,11 @@ data "aws_iam_policy_document" "config_bucket_policy" {
       )
     }
     condition {
-      test = "StringEquals"
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
       values = [
         "bucket-owner-full-control"
       ]
-      variable = "s3:x-amz-acl"
     }
   }
 }
