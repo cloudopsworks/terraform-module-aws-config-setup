@@ -27,7 +27,11 @@ data "aws_iam_policy_document" "config_kms" {
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"
-      values   = ["${data.aws_partition.current.dns_suffix}"]
+      values = concat([
+        "config.${data.aws_region.current.name}.${data.aws_partition.current.dns_suffix}"
+        ],
+        try(var.settings.additional_services, [])
+      )
     }
   }
   statement {
