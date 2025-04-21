@@ -13,6 +13,58 @@ resource "random_string" "random" {
   numeric = true
 }
 
+data "aws_iam_policy_document" "config_bucket_policy" {
+  statement {
+    sid    = "AWSConfigBucketPermissionsCheck"
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = [
+        "config.amazonaws.com"
+      ]
+    }
+    actions = [
+      "s3:GetBucketAcl"
+    ]
+    resources = [
+      "aws:s3:::${local.bucket_name}"
+    ]
+  }
+  statement {
+    sid    = "AWSConfigBucketExistenceCheck"
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = [
+        "config.amazonaws.com"
+      ]
+    }
+    actions = [
+      "s3:ListBucket"
+    ]
+    resources = [
+      "aws:s3:::${local.bucket_name}"
+    ]
+  }
+  statement {
+    sid    = "AWSConfigBucketDelivery"
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = [
+        "config.amazonaws.com"
+      ]
+    }
+    actions = [
+      "s3:PutObject"
+    ]
+    resources = [
+      try(var.settings.s3_prefix, "") != "" ? "aws:s3:::${local.bucket_name}/${var.settings.s3_prefix}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*" :
+      "aws:s3:::${local.bucket_name}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
+    ]
+  }
+}
+
 module "config_bucket" {
   source                                = "terraform-aws-modules/s3-bucket/aws"
   version                               = "~> 4.1"
@@ -26,6 +78,7 @@ module "config_bucket" {
   block_public_policy                   = true
   ignore_public_acls                    = true
   restrict_public_buckets               = true
+  policy                                = data.aws_iam_policy_document.config_bucket_policy.json
   versioning = {
     enabled = false
   }
