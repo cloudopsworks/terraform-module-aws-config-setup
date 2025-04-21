@@ -81,6 +81,7 @@ resource "aws_kms_key" "config" {
   rotation_period_in_days = 90
   enable_key_rotation     = true
   is_enabled              = true
+  multi_region            = true
   key_usage               = "ENCRYPT_DECRYPT"
   tags                    = local.all_tags
 }
