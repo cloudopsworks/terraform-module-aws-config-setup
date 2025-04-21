@@ -7,6 +7,7 @@
 # KMS Key policy, to allow AWS Config make use of the KMS key
 data "aws_iam_policy_document" "config_kms" {
   statement {
+    sid = "AWSConfig"
     actions = [
       "kms:Decrypt",
       "kms:DescribeKey",
@@ -29,6 +30,25 @@ data "aws_iam_policy_document" "config_kms" {
       test     = "StringEquals"
       variable = "kms:ViaService"
       values   = ["${data.aws_partition.current.dns_suffix}"]
+    }
+  }
+  statement {
+    sid = "AllowAdminToRoot"
+    actions = [
+      "kms:ListAliases",
+      "kms:ListGrants",
+      "kms:ListKeyPolicies",
+      "kms:ListResourceTags",
+      "kms:GetKeyPolicy",
+      "kms:GetKeyRotationStatus",
+      "kms:GetPublicKey",
+      "kms:DescribeKey"
+    ]
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
+      ]
     }
   }
 }
