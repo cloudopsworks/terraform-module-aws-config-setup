@@ -6,7 +6,7 @@
 
 resource "aws_iam_service_linked_role" "config" {
   aws_service_name = "config.amazonaws.com"
-  custom_suffix    = local.clean_name
+  #custom_suffix    = local.clean_name
   tags             = local.all_tags
 }
 
