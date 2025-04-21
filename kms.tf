@@ -18,14 +18,11 @@ data "aws_iam_policy_document" "config_kms" {
       "kms:ListGrants",
       "kms:RevokeGrant"
     ]
-
     principals {
       type        = "Service"
       identifiers = ["config.amazonaws.com"]
     }
-
     resources = ["*"]
-
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"
@@ -34,15 +31,9 @@ data "aws_iam_policy_document" "config_kms" {
   }
   statement {
     sid = "AllowAdminToRoot"
+    effect = "Allow"
     actions = [
-      "kms:ListAliases",
-      "kms:ListGrants",
-      "kms:ListKeyPolicies",
-      "kms:ListResourceTags",
-      "kms:GetKeyPolicy",
-      "kms:GetKeyRotationStatus",
-      "kms:GetPublicKey",
-      "kms:DescribeKey"
+      "kms:*",
     ]
     principals {
       type = "AWS"
@@ -50,6 +41,9 @@ data "aws_iam_policy_document" "config_kms" {
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
       ]
     }
+    resources = [
+      "*"
+    ]
   }
 }
 
