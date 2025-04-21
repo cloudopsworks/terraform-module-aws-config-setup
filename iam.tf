@@ -41,6 +41,12 @@ data "aws_iam_policy_document" "config_s3_policy" {
       "s3:DeleteObject",
       "s3:GetBucketAcl",
     ]
+    principals {
+      type = "AWS"
+      identifiers = [
+        data.aws_caller_identity.current.account_id
+      ]
+    }
     resources = [
       "${module.config_bucket.s3_bucket_arn}/*",
       module.config_bucket.s3_bucket_arn
@@ -54,6 +60,12 @@ data "aws_iam_policy_document" "config_sns_policy" {
     actions = [
       "sns:Publish"
     ]
+    principals {
+      type = "AWS"
+      identifiers = [
+        data.aws_caller_identity.current.account_id
+      ]
+    }
     resources = [
       aws_sns_topic.config_sns.arn
     ]
@@ -71,6 +83,12 @@ data "aws_iam_policy_document" "config_kms_policy" {
       "kms:ReEncrypt*",
       "kms:CreateGrant",
     ]
+    principals {
+      type = "AWS"
+      identifiers = [
+        data.aws_caller_identity.current.account_id
+      ]
+    }
     resources = [
       aws_kms_key.config.arn
     ]
