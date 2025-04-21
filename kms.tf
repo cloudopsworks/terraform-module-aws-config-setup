@@ -30,16 +30,18 @@ data "aws_iam_policy_document" "config_kms" {
     }
   }
   statement {
-    sid = "AllowAdminToRoot"
+    sid    = "AllowAdminToRoot"
     effect = "Allow"
     actions = [
       "kms:*",
     ]
     principals {
       type = "AWS"
-      identifiers = [
+      identifiers = concat([
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
-      ]
+        ],
+        try(var.settings.additional_kms_admins, [])
+      )
     }
     resources = [
       "*"
@@ -49,7 +51,7 @@ data "aws_iam_policy_document" "config_kms" {
 
 resource "aws_kms_key" "config" {
   description             = "KMS key for AWS Config"
-  deletion_window_in_days = 7
+  deletion_window_in_days = 15
   enable_key_rotation     = true
   is_enabled              = true
   key_usage               = "ENCRYPT_DECRYPT"
