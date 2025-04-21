@@ -47,6 +47,24 @@ data "aws_iam_policy_document" "config_kms" {
       "*"
     ]
   }
+  statement {
+    sid    = "UseAccounts"
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*",
+
+    ]
+    principals {
+      type = "AWS"
+      identifiers = [
+        data.aws_caller_identity.current.account_id
+      ]
+    }
+    resources = [
+      aws_kms_key.config.arn
+    ]
+  }
 }
 
 resource "aws_kms_key" "config" {
@@ -55,10 +73,13 @@ resource "aws_kms_key" "config" {
   enable_key_rotation     = true
   is_enabled              = true
   key_usage               = "ENCRYPT_DECRYPT"
-  policy                  = data.aws_iam_policy_document.config_kms.json
   tags                    = local.all_tags
 }
 
+resource "aws_kms_key_policy" "config" {
+  key_id = aws_kms_key.config.key_id
+  policy = data.aws_iam_policy_document.config_kms.json
+}
 resource "aws_kms_alias" "config" {
   name          = "alias/${local.clean_name}"
   target_key_id = aws_kms_key.config.key_id
