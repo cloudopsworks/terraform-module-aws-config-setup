@@ -107,6 +107,7 @@ module "config_bucket" {
   block_public_policy                   = true
   ignore_public_acls                    = true
   restrict_public_buckets               = true
+  attach_policy                         = true
   policy                                = data.aws_iam_policy_document.config_bucket_policy[0].json
   versioning = {
     enabled = false
