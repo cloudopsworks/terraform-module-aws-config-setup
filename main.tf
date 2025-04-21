@@ -11,8 +11,10 @@ locals {
 }
 
 resource "aws_config_configuration_recorder" "this" {
-  name     = local.clean_name
-  role_arn = try(var.settings.service_role, false) ? aws_iam_service_linked_role.config[0].arn : aws_iam_role.this[0].arn
+  name = local.clean_name
+  role_arn = try(var.settings.service_role_arn,
+    try(var.settings.service_role, false) ? aws_iam_service_linked_role.config[0].arn : aws_iam_role.this[0].arn
+  )
 }
 
 data "aws_kms_alias" "config" {
