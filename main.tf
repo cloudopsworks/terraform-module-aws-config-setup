@@ -28,6 +28,15 @@ resource "aws_config_delivery_channel" "this" {
     aws_config_configuration_recorder.this
   ]
 }
+
+resource "aws_config_configuration_recorder_status" "this" {
+  name       = aws_config_configuration_recorder.this.name
+  is_enabled = try(var.settings.recorder_enabled, true)
+  depends_on = [
+    aws_config_delivery_channel.this
+  ]
+}
+
 resource "aws_config_retention_configuration" "this" {
   retention_period_in_days = try(var.settings.retention_period_in_days, 365)
 }

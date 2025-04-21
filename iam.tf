@@ -7,7 +7,7 @@
 resource "aws_iam_service_linked_role" "config" {
   aws_service_name = "config.amazonaws.com"
   #custom_suffix    = local.clean_name
-  tags             = local.all_tags
+  tags = local.all_tags
 }
 
 # data "aws_iam_policy_document" "config_assume_role_policy" {
