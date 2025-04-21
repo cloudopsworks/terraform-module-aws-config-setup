@@ -31,3 +31,11 @@ output "config_sns_topic_name" {
 output "config_sns_topic_arn" {
   value = aws_sns_topic.config_sns.arn
 }
+
+output "config_service_linked_role_arn" {
+  value = var.is_hub ? aws_iam_service_linked_role.config[0].arn : null
+}
+
+output "config_iam_role_arn" {
+  value = var.is_hub ? aws_iam_role.this[0].arn : null
+}
