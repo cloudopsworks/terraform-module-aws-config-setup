@@ -5,11 +5,11 @@
 #
 
 output "config_bucket_name" {
-  value = var.is_hub ? module.config_bucket.s3_bucket_id : null
+  value = var.is_hub ? module.config_bucket[0].s3_bucket_id : null
 }
 
 output "config_bucket_arn" {
-  value = var.is_hub ? module.config_bucket.s3_bucket_arn : null
+  value = var.is_hub ? module.config_bucket[0].s3_bucket_arn : null
 }
 
 output "config_kms_key_arn" {
