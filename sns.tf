@@ -5,10 +5,9 @@
 #
 
 resource "aws_sns_topic" "config_sns" {
-  name              = local.sns_name
-  display_name      = "Config SNS Topic - ${local.sns_name}"
-  kms_master_key_id = aws_kms_key.config.id
-  tags              = local.all_tags
+  name         = local.sns_name
+  display_name = "Config SNS Topic - ${local.sns_name}"
+  tags         = local.all_tags
 }
 
 data "aws_iam_policy_document" "config_sns" {

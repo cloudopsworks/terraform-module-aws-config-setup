@@ -5,12 +5,13 @@
 #
 
 resource "aws_iam_service_linked_role" "config" {
+  count            = var.is_hub || try(var.settings.service_role, false) ? 1 : 0
   aws_service_name = "config.amazonaws.com"
-  #custom_suffix    = local.clean_name
-  tags = local.all_tags
+  tags             = local.all_tags
 }
 
 data "aws_iam_policy_document" "config_assume_role_policy" {
+  count = var.is_hub ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -26,12 +27,14 @@ data "aws_iam_policy_document" "config_assume_role_policy" {
 }
 
 resource "aws_iam_role" "this" {
+  count              = var.is_hub ? 1 : 0
   name               = "${local.clean_name}-role"
-  assume_role_policy = data.aws_iam_policy_document.config_assume_role_policy.json
+  assume_role_policy = data.aws_iam_policy_document.config_assume_role_policy[count.index].json
   tags               = local.all_tags
 }
 
 data "aws_iam_policy_document" "config_s3_policy" {
+  count = var.is_hub ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -42,13 +45,14 @@ data "aws_iam_policy_document" "config_s3_policy" {
       "s3:GetBucketAcl",
     ]
     resources = [
-      "${module.config_bucket.s3_bucket_arn}/*",
-      module.config_bucket.s3_bucket_arn
+      "${module.config_bucket[count.index].s3_bucket_arn}/*",
+      module.config_bucket[count.index].s3_bucket_arn
     ]
   }
 }
 
 data "aws_iam_policy_document" "config_sns_policy" {
+  count = var.is_hub ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -61,6 +65,7 @@ data "aws_iam_policy_document" "config_sns_policy" {
 }
 
 data "aws_iam_policy_document" "config_kms_policy" {
+  count = var.is_hub ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -72,30 +77,28 @@ data "aws_iam_policy_document" "config_kms_policy" {
       "kms:CreateGrant",
     ]
     resources = [
-      aws_kms_key.config.arn
+      aws_kms_key.config[count.index].arn
     ]
   }
 }
 
 resource "aws_iam_role_policy" "config_s3_policy" {
+  count  = var.is_hub ? 1 : 0
   name   = "${local.clean_name}-s3-policy"
-  role   = aws_iam_role.this.id
-  policy = data.aws_iam_policy_document.config_s3_policy.json
+  role   = aws_iam_role.this[count.index].id
+  policy = data.aws_iam_policy_document.config_s3_policy[count.index].json
 }
 
 resource "aws_iam_role_policy" "config_sns_policy" {
+  count  = var.is_hub ? 1 : 0
   name   = "${local.clean_name}-sns-policy"
-  role   = aws_iam_role.this.id
-  policy = data.aws_iam_policy_document.config_sns_policy.json
+  role   = aws_iam_role.this[count.index].id
+  policy = data.aws_iam_policy_document.config_sns_policy[count.index].json
 }
 
 resource "aws_iam_role_policy" "config_kms_policy" {
+  count  = var.is_hub ? 1 : 0
   name   = "${local.clean_name}-kms-policy"
-  role   = aws_iam_role.this.id
-  policy = data.aws_iam_policy_document.config_kms_policy.json
+  role   = aws_iam_role.this[count.index].id
+  policy = data.aws_iam_policy_document.config_kms_policy[count.index].json
 }
-
-# resource "aws_iam_role_policy_attachment" "config_policy" {
-#   role       = aws_iam_role.this.id
-#   policy_arn = "arn:aws:iam::aws:policy/aws-service-role/AWSConfigServiceRolePolicy"
-# }
