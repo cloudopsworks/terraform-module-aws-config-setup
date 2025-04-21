@@ -63,10 +63,10 @@ data "aws_iam_policy_document" "config_kms" {
     principals {
       type = "AWS"
       identifiers = concat([
-        aws_iam_service_linked_role.config.arn,
         data.aws_caller_identity.current.account_id,
         ],
-        try(var.settings.additional_accounts_access, [])
+        try(var.settings.additional_accounts_access, []),
+        aws_iam_service_linked_role.config.*.arn,
       )
     }
     resources = [
