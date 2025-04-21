@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "config_bucket_policy" {
       "s3:GetBucketAcl"
     ]
     resources = [
-      "aws:s3:::${local.bucket_name}"
+      "arn:aws:s3:::f${local.bucket_name}"
     ]
     condition {
       test     = "StringEquals"
@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "config_bucket_policy" {
       "s3:ListBucket"
     ]
     resources = [
-      "aws:s3:::${local.bucket_name}"
+      "arn:aws:s3:::f${local.bucket_name}"
     ]
     condition {
       test     = "StringEquals"
@@ -78,8 +78,8 @@ data "aws_iam_policy_document" "config_bucket_policy" {
       "s3:PutObject"
     ]
     resources = [
-      try(var.settings.s3_prefix, "") != "" ? "aws:s3:::${local.bucket_name}/${var.settings.s3_prefix}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*" :
-      "aws:s3:::${local.bucket_name}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
+      try(var.settings.s3_prefix, "") != "" ? "arn:aws:s3:::f${local.bucket_name}/${var.settings.s3_prefix}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*" :
+      "arn:aws:s3:::f${local.bucket_name}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
     ]
     condition {
       test     = "StringEquals"
