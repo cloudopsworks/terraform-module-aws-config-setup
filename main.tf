@@ -12,7 +12,7 @@ locals {
 
 resource "aws_config_configuration_recorder" "this" {
   name     = local.clean_name
-  role_arn = aws_iam_role.this.arn
+  role_arn = aws_iam_service_linked_role.config.arn
 }
 
 resource "aws_config_delivery_channel" "this" {
