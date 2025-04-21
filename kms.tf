@@ -78,6 +78,7 @@ resource "aws_kms_key" "config" {
   count                   = var.is_hub ? 1 : 0
   description             = "KMS key for AWS Config"
   deletion_window_in_days = 15
+  rotation_period_in_days = 90
   enable_key_rotation     = true
   is_enabled              = true
   key_usage               = "ENCRYPT_DECRYPT"
