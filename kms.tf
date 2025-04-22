@@ -74,8 +74,8 @@ data "aws_iam_policy_document" "config_kms" {
         )
       }
       resources = coalescelist([
-        try(aws_kms_key.config[0].arn, []),
-        try(aws_kms_replica_key.config[0].arn, [])]...
+        try([aws_kms_key.config[0].arn], []),
+        try([aws_kms_replica_key.config[0].arn], [])]...
       )
     }
   }
@@ -95,8 +95,8 @@ data "aws_iam_policy_document" "config_kms" {
         ]
       }
       resources = coalescelist([
-        try(aws_kms_key.config[0].arn, []),
-        try(aws_kms_replica_key.config[0].arn, [])]...
+        try([aws_kms_key.config[0].arn], []),
+        try([aws_kms_replica_key.config[0].arn], [])]...
       )
       condition {
         test     = "StringEquals"
