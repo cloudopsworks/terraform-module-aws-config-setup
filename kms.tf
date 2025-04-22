@@ -52,26 +52,56 @@ data "aws_iam_policy_document" "config_kms" {
       "*"
     ]
   }
-  statement {
-    sid    = "UseAccounts"
-    effect = "Allow"
-    actions = [
-      "kms:Decrypt",
-      "kms:GenerateDataKey*",
-
-    ]
-    principals {
-      type = "AWS"
-      identifiers = concat([
-        data.aws_caller_identity.current.account_id,
-        ],
-        try(var.settings.additional_accounts_access, []),
-        aws_iam_service_linked_role.config.*.arn,
-      )
+  dynamic "statement" {
+    for_each = try(var.settings.service_role, false) ? [1] : []
+    content {
+      sid    = "AWSConfigKMSPolicyRole"
+      effect = "Allow"
+      actions = [
+        "kms:Decrypt",
+        "kms:GenerateDataKey*",
+      ]
+      principals {
+        type = "AWS"
+        identifiers = concat([
+          data.aws_caller_identity.current.account_id,
+          ],
+          try(var.settings.additional_accounts_access, []),
+        )
+      }
+      resources = [
+        aws_kms_key.config[count.index].arn
+      ]
     }
-    resources = [
-      aws_kms_key.config[count.index].arn
-    ]
+  }
+  dynamic "statement" {
+    for_each = try(var.settings.service_role, false) ? [] : [1]
+    content {
+      sid    = "AWSConfigKMSPolicySA"
+      effect = "Allow"
+      actions = [
+        "kms:Decrypt",
+        "kms:GenerateDataKey*",
+      ]
+      principals {
+        type = "Service"
+        identifiers = [
+          "config.amazonaws.com",
+        ]
+      }
+      resources = [
+        aws_kms_key.config[count.index].arn
+      ]
+      condition {
+        test     = "StringEquals"
+        variable = "AWS:SourceAccount"
+        values = concat([
+          data.aws_caller_identity.current.account_id,
+          ],
+          try(var.settings.additional_accounts_access, []),
+        )
+      }
+    }
   }
 }
 
