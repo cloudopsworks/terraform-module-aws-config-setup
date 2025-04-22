@@ -15,6 +15,31 @@ resource "aws_config_configuration_recorder" "this" {
   role_arn = try(var.settings.service_role_arn,
     try(var.settings.service_role, false) ? aws_iam_service_linked_role.config[0].arn : aws_iam_role.this[0].arn
   )
+  recording_group {
+    all_supported                 = try(var.settings.recording.all_supported, true)
+    resource_types                = try(var.settings.recording.resource_types, null)
+    include_global_resource_types = try(var.settings.recording.include_global_resource_types, null)
+    dynamic "exclusion_by_resource_types" {
+      for_each = length(try(var.settings.recording.exclusion_by_resource_types, [])) > 0 ? [1] : []
+      content {
+        resource_types = var.settings.recording.exclusion_by_resource_types
+      }
+    }
+    recording_strategy {
+      use_only = try(var.settings.recording.use_only, null)
+    }
+  }
+  recording_mode {
+    recording_frequency = try(var.settings.recording.recording_frequency, "CONTINUOUS")
+    dynamic "recording_mode_override" {
+      for_each = length(try(var.settings.recording.override, {})) > 0 ? [1] : []
+      content {
+        description         = try(var.settings.recording.override.description, null)
+        resource_types      = try(var.settings.recording.override.resource_types, [])
+        recording_frequency = try(var.settings.recording.override.recording_frequency, "CONTINUOUS")
+      }
+    }
+  }
 }
 
 data "aws_kms_alias" "config" {
