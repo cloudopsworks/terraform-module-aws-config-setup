@@ -23,10 +23,7 @@ data "aws_iam_policy_document" "config_kms" {
       type        = "Service"
       identifiers = ["config.amazonaws.com"]
     }
-    resources = coalescelist([
-      try(aws_kms_key.config[0].arn, []),
-      try(aws_kms_replica_key.config[0].arn, [])]...
-    )
+    resources = var.is_hub ? [aws_kms_key.config[0].arn] : [aws_kms_replica_key.config[0].arn]
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"
@@ -51,10 +48,7 @@ data "aws_iam_policy_document" "config_kms" {
         try(var.settings.additional_kms_admins, [])
       )
     }
-    resources = coalescelist([
-      try(aws_kms_key.config[0].arn, []),
-      try(aws_kms_replica_key.config[0].arn, [])]...
-    )
+    resources = var.is_hub ? [aws_kms_key.config[0].arn] : [aws_kms_replica_key.config[0].arn]
   }
   dynamic "statement" {
     for_each = try(var.settings.service_role, false) ? [1] : []
@@ -73,10 +67,7 @@ data "aws_iam_policy_document" "config_kms" {
           try(var.settings.additional_accounts_access, []),
         )
       }
-      resources = coalescelist([
-        try([aws_kms_key.config[0].arn], []),
-        try([aws_kms_replica_key.config[0].arn], [])]...
-      )
+      resources = var.is_hub ? [aws_kms_key.config[0].arn] : [aws_kms_replica_key.config[0].arn]
     }
   }
   dynamic "statement" {
@@ -94,10 +85,7 @@ data "aws_iam_policy_document" "config_kms" {
           "config.amazonaws.com",
         ]
       }
-      resources = coalescelist([
-        try([aws_kms_key.config[0].arn], []),
-        try([aws_kms_replica_key.config[0].arn], [])]...
-      )
+      resources = var.is_hub ? [aws_kms_key.config[0].arn] : [aws_kms_replica_key.config[0].arn]
       condition {
         test     = "StringEquals"
         variable = "AWS:SourceAccount"
