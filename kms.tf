@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "config_kms" {
     resources = var.is_hub ? [aws_kms_key.config[0].arn] : [aws_kms_replica_key.config[0].arn]
   }
   dynamic "statement" {
-    for_each = try(var.settings.service_role, false) ? [1] : []
+    for_each = try(var.settings.service_role, false) ? [] : [1]
     content {
       sid    = "AWSConfigKMSPolicyRole"
       effect = "Allow"
@@ -71,7 +71,7 @@ data "aws_iam_policy_document" "config_kms" {
     }
   }
   dynamic "statement" {
-    for_each = try(var.settings.service_role, false) ? [] : [1]
+    for_each = try(var.settings.service_role, false) ? [1] : []
     content {
       sid    = "AWSConfigKMSPolicySA"
       effect = "Allow"
