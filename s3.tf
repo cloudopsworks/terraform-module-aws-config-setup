@@ -90,6 +90,13 @@ data "aws_iam_policy_document" "config_bucket_policy" {
         try(var.settings.additional_accounts_access, [])
       )
     }
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values = [
+        "bucket-owner-full-control"
+      ]
+    }
   }
 }
 
