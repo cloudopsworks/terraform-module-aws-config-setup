@@ -69,9 +69,10 @@ data "aws_iam_policy_document" "config_kms" {
           try(var.settings.additional_accounts_access, []),
         )
       }
-      resources = [
-        aws_kms_key.config[count.index].arn
-      ]
+      resources = coalesce(
+        aws_kms_key.config.*.arn,
+        aws_kms_replica_key.config.*.arn
+      )
     }
   }
   dynamic "statement" {
@@ -89,9 +90,10 @@ data "aws_iam_policy_document" "config_kms" {
           "config.amazonaws.com",
         ]
       }
-      resources = [
-        aws_kms_key.config[count.index].arn
-      ]
+      resources = coalesce(
+        aws_kms_key.config.*.arn,
+        aws_kms_replica_key.config.*.arn
+      )
       condition {
         test     = "StringEquals"
         variable = "AWS:SourceAccount"
