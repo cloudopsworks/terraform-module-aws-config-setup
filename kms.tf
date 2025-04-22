@@ -6,7 +6,7 @@
 
 # KMS Key policy, to allow AWS Config make use of the KMS key
 data "aws_iam_policy_document" "config_kms" {
-  count = var.is_hub ? 1 : 0
+  count = var.is_hub || try(var.settings.kms.multi_region, false) ? 1 : 0
   statement {
     sid = "AWSConfig"
     actions = [
@@ -122,8 +122,28 @@ resource "aws_kms_key_policy" "config" {
   key_id = aws_kms_key.config[count.index].key_id
   policy = data.aws_iam_policy_document.config_kms[count.index].json
 }
+
 resource "aws_kms_alias" "config" {
   count         = var.is_hub ? 1 : 0
   name          = "alias/${local.clean_name}"
   target_key_id = aws_kms_key.config[count.index].key_id
+}
+
+resource "aws_kms_replica_key" "config" {
+  count           = try(var.settings.kms.multi_region, false) && var.is_hub == false ? 1 : 0
+  description     = "KMS key for AWS Config (Multi-Region Replica)"
+  primary_key_arn = var.settings.kms.key_arn
+  tags            = local.all_tags
+}
+
+resource "aws_kms_alias" "config_replica" {
+  count         = try(var.settings.kms.multi_region, false) && var.is_hub == false ? 1 : 0
+  name          = "alias/${local.clean_name}"
+  target_key_id = aws_kms_replica_key.config[count.index].key_id
+}
+
+resource "aws_kms_key_policy" "config_replica" {
+  count  = try(var.settings.kms.multi_region, false) && var.is_hub == false ? 1 : 0
+  key_id = aws_kms_replica_key.config[count.index].key_id
+  policy = data.aws_iam_policy_document.config_kms[count.index].json
 }
