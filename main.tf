@@ -11,7 +11,7 @@ locals {
 }
 
 resource "aws_config_configuration_recorder" "this" {
-  name = local.clean_name
+  name = try(var.settings.custom, false) ? local.clean_name : "default"
   role_arn = try(var.settings.service_role_arn,
     try(var.settings.service_role, false) ? aws_iam_service_linked_role.config[0].arn : aws_iam_role.this[0].arn
   )
@@ -48,7 +48,7 @@ data "aws_kms_alias" "config" {
 }
 
 resource "aws_config_delivery_channel" "this" {
-  name           = local.clean_name
+  name           = try(var.settings.custom, false) ? local.clean_name : "default"
   s3_bucket_name = var.is_hub ? module.config_bucket[0].s3_bucket_id : var.settings.s3_bucket_name
   s3_key_prefix  = try(var.settings.s3_prefix, "")
   s3_kms_key_arn = var.is_hub ? aws_kms_key.config[0].arn : try(data.aws_kms_alias.config[0].target_key_arn, aws_kms_replica_key.config[0].arn, var.settings.kms.key_arn)
