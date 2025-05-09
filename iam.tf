@@ -30,7 +30,7 @@ resource "aws_iam_role" "this" {
   count              = var.is_hub ? 1 : 0
   name               = "${local.clean_name}-role"
   description        = "AWS Config role for ${local.clean_name}"
-  path               = "/aws-service-role/config.amazonaws.com/"
+  path               = "/service-role/config.amazonaws.com/"
   assume_role_policy = data.aws_iam_policy_document.config_assume_role_policy[count.index].json
   tags               = local.all_tags
 }
