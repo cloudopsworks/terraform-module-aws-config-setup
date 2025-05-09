@@ -105,8 +105,22 @@ resource "aws_iam_role_policy" "config_kms_policy" {
   policy = data.aws_iam_policy_document.config_kms_policy[count.index].json
 }
 
+data "aws_iam_policy" "config_policy" {
+  count = var.is_hub ? 1 : 0
+  arn   = "arn:aws:iam::aws:policy/aws-service-role/AWSConfigServiceRolePolicy"
+}
+
+resource "aws_iam_policy" "config_policy" {
+  count       = var.is_hub ? 1 : 0
+  name        = "${local.clean_name}-config-policy"
+  description = "AWS Config policy for ${local.clean_name}"
+  path        = "/service-role/config.amazonaws.com/"
+  policy      = data.aws_iam_policy.config_policy[count.index].policy
+  tags        = local.all_tags
+}
+
 resource "aws_iam_role_policy_attachment" "config_policy" {
   count      = var.is_hub ? 1 : 0
   role       = aws_iam_role.this[count.index].id
-  policy_arn = "arn:aws:iam::aws:policy/aws-service-role/AWSConfigServiceRolePolicy"
+  policy_arn = aws_iam_policy.config_policy[count.index].arn
 }
