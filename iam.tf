@@ -104,3 +104,9 @@ resource "aws_iam_role_policy" "config_kms_policy" {
   role   = aws_iam_role.this[count.index].id
   policy = data.aws_iam_policy_document.config_kms_policy[count.index].json
 }
+
+resource "aws_iam_role_policy_attachment" "config_policy" {
+  count      = var.is_hub ? 1 : 0
+  role       = aws_iam_role.this[count.index].id
+  policy_arn = "arn:aws:iam::aws:policy/aws-service-role/AWSConfigServiceRolePolicy"
+}
