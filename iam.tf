@@ -84,43 +84,65 @@ data "aws_iam_policy_document" "config_kms_policy" {
   }
 }
 
-resource "aws_iam_role_policy" "config_s3_policy" {
+resource "aws_iam_policy" "config_s3_policy" {
   count  = var.is_hub ? 1 : 0
   name   = "${local.clean_name}-s3-policy"
-  role   = aws_iam_role.this[count.index].id
+  path   = "/service-role/config.amazonaws.com/"
   policy = data.aws_iam_policy_document.config_s3_policy[count.index].json
 }
 
-resource "aws_iam_role_policy" "config_sns_policy" {
+resource "aws_iam_role_policy_attachment" "config_s3_policy" {
+  count      = var.is_hub ? 1 : 0
+  role       = aws_iam_role.this[count.index].id
+  policy_arn = aws_iam_policy.config_s3_policy[count.index].arn
+}
+
+resource "aws_iam_role_policy_attachment" "config_s3_policy" {
+  count      = var.is_hub ? 1 : 0
+  role       = aws_iam_role.this[count.index].id
+  policy_arn = aws_iam_policy.config_s3_policy[count.index].arn
+}
+
+resource "aws_iam_role_policy_attachment" "config_s3_policy_servicerole" {
+  count      = var.is_hub || try(var.settings.service_role, false) ? 1 : 0
+  role       = aws_iam_service_linked_role.config[count.index].name
+  policy_arn = aws_iam_policy.config_s3_policy[count.index].arn
+}
+
+resource "aws_iam_policy" "config_sns_policy" {
   count  = var.is_hub ? 1 : 0
   name   = "${local.clean_name}-sns-policy"
-  role   = aws_iam_role.this[count.index].id
+  path   = "/service-role/config.amazonaws.com/"
   policy = data.aws_iam_policy_document.config_sns_policy[count.index].json
 }
 
-resource "aws_iam_role_policy" "config_kms_policy" {
+resource "aws_iam_role_policy_attachment" "config_sns_policy" {
+  count      = var.is_hub ? 1 : 0
+  role       = aws_iam_role.this[count.index].id
+  policy_arn = aws_iam_policy.config_sns_policy[count.index].arn
+}
+
+resource "aws_iam_role_policy_attachment" "config_sns_policy_servicerole" {
+  count      = var.is_hub || try(var.settings.service_role, false) ? 1 : 0
+  role       = aws_iam_service_linked_role.config[count.index].name
+  policy_arn = aws_iam_policy.config_sns_policy[count.index].arn
+}
+
+resource "aws_iam_policy" "config_kms_policy" {
   count  = var.is_hub ? 1 : 0
   name   = "${local.clean_name}-kms-policy"
-  role   = aws_iam_role.this[count.index].id
+  path   = "/service-role/config.amazonaws.com/"
   policy = data.aws_iam_policy_document.config_kms_policy[count.index].json
 }
 
-data "aws_iam_policy" "config_policy" {
-  count = var.is_hub ? 1 : 0
-  arn   = "arn:aws:iam::aws:policy/aws-service-role/AWSConfigServiceRolePolicy"
-}
-
-resource "aws_iam_policy" "config_policy" {
-  count       = var.is_hub ? 1 : 0
-  name        = "${local.clean_name}-config-policy"
-  description = "AWS Config policy for ${local.clean_name}"
-  path        = "/service-role/config.amazonaws.com/"
-  policy      = data.aws_iam_policy.config_policy[count.index].policy
-  tags        = local.all_tags
-}
-
-resource "aws_iam_role_policy_attachment" "config_policy" {
+resource "aws_iam_role_policy_attachment" "config_kms_policy" {
   count      = var.is_hub ? 1 : 0
   role       = aws_iam_role.this[count.index].id
-  policy_arn = aws_iam_policy.config_policy[count.index].arn
+  policy_arn = aws_iam_policy.config_kms_policy[count.index].arn
+}
+
+resource "aws_iam_role_policy_attachment" "config_kms_policy_servicerole" {
+  count      = var.is_hub || try(var.settings.service_role, false) ? 1 : 0
+  role       = aws_iam_service_linked_role.config[count.index].name
+  policy_arn = aws_iam_policy.config_kms_policy[count.index].arn
 }
