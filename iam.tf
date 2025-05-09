@@ -97,12 +97,6 @@ resource "aws_iam_role_policy_attachment" "config_s3_policy" {
   policy_arn = aws_iam_policy.config_s3_policy[count.index].arn
 }
 
-resource "aws_iam_role_policy_attachment" "config_s3_policy" {
-  count      = var.is_hub ? 1 : 0
-  role       = aws_iam_role.this[count.index].id
-  policy_arn = aws_iam_policy.config_s3_policy[count.index].arn
-}
-
 resource "aws_iam_role_policy_attachment" "config_s3_policy_servicerole" {
   count      = var.is_hub || try(var.settings.service_role, false) ? 1 : 0
   role       = aws_iam_service_linked_role.config[count.index].name
