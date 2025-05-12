@@ -35,7 +35,7 @@ resource "aws_config_configuration_recorder" "this" {
       for_each = length(try(var.settings.recording.override, {})) > 0 ? [1] : []
       content {
         description         = try(var.settings.recording.override.description, null)
-        resource_types      = try(var.settings.recording.override.resource_types, [])
+        resource_types      = var.settings.recording.override.resource_types
         recording_frequency = try(var.settings.recording.override.recording_frequency, "CONTINUOUS")
       }
     }
