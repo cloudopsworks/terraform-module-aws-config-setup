@@ -77,10 +77,13 @@ data "aws_iam_policy_document" "config_bucket_policy" {
     actions = [
       "s3:PutObject"
     ]
-    resources = [
+    resources = concat([
       try(var.settings.s3_prefix, "") != "" ? "arn:aws:s3:::${local.bucket_name}/${var.settings.s3_prefix}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*" :
       "arn:aws:s3:::${local.bucket_name}/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
-    ]
+      ],
+      [
+        for access_account in try(var.settings.additional_accounts_access, []) : "arn:aws:s3:::${local.bucket_name}/AWSLogs/${access_account}/Config/*"
+    ])
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceAccount"
