@@ -11,7 +11,8 @@ locals {
 }
 
 resource "aws_config_configuration_recorder" "this" {
-  name = try(var.settings.custom, false) ? local.clean_name : "default"
+  count = var.is_hub ? 1 : 0
+  name  = try(var.settings.custom, false) ? local.clean_name : "default"
   role_arn = try(var.settings.service_role_arn,
     try(var.settings.service_role, false) ? aws_iam_service_linked_role.config[0].arn : aws_iam_role.this[0].arn
   )
@@ -63,7 +64,8 @@ resource "aws_config_delivery_channel" "this" {
 }
 
 resource "aws_config_configuration_recorder_status" "this" {
-  name       = aws_config_configuration_recorder.this.name
+  count      = var.is_hub ? 1 : 0
+  name       = aws_config_configuration_recorder.this[0].name
   is_enabled = try(var.settings.recorder_enabled, true)
   depends_on = [
     aws_config_delivery_channel.this
@@ -72,4 +74,35 @@ resource "aws_config_configuration_recorder_status" "this" {
 
 resource "aws_config_retention_configuration" "this" {
   retention_period_in_days = try(var.settings.retention_period_in_days, 365)
+}
+
+resource "aws_config_configuration_aggregator" "this" {
+  for_each = {
+    for item in try(var.settings.aggregators, []) : item.name => item
+    if var.is_hub
+  }
+  name = each.value.name
+  dynamic "account_aggregation_source" {
+    for_each = length(try(each.value.account, [])) > 0 ? [1] : []
+    content {
+      account_ids = try(each.value.account.account_ids, null)
+      all_regions = try(each.value.account.all_regions, null)
+      regions     = try(each.value.account.regions, null)
+    }
+  }
+  dynamic "organization_aggregation_source" {
+    for_each = length(try(each.value.organization, [])) > 0 ? [1] : []
+    content {
+      all_regions = try(each.value.organization.all_regions, null)
+      regions     = try(each.value.organization.regions, null)
+      role_arn    = aws_iam_role.config_aggregator[0].arn
+    }
+  }
+  tags = local.all_tags
+}
+
+resource "aws_organizations_delegated_administrator" "this" {
+  count             = try(var.settings.organization.delegated, false) ? 1 : 0
+  account_id        = var.settings.organization.account_id
+  service_principal = "config.amazonaws.com"
 }
