@@ -106,3 +106,78 @@ resource "aws_organizations_delegated_administrator" "this" {
   account_id        = var.settings.organization.account_id
   service_principal = "config.amazonaws.com"
 }
+
+resource "aws_config_organization_conformance_pack" "org_config" {
+  for_each = {
+    for item in try(var.settings.organization.conformance_packs, []) : item.name => item
+    if var.is_hub
+  }
+  name                   = each.value.name
+  template_body          = try(each.value.template_body, null)
+  template_s3_uri        = try(each.value.template_s3_uri, null)
+  delivery_s3_bucket     = local.bucket_name
+  delivery_s3_key_prefix = try(each.value.delivery_s3_key_prefix, "conformance-pack/${each.key}")
+  excluded_accounts      = try(each.value.excluded_accounts, null)
+  dynamic "input_parameter" {
+    for_each = try(each.value.input_parameters, [])
+    content {
+      parameter_name  = input_parameter.value.name
+      parameter_value = input_parameter.value.value
+    }
+  }
+  depends_on = [aws_config_configuration_recorder.this]
+}
+
+resource "aws_config_organization_managed_rule" "org_config" {
+  for_each = {
+    for item in try(var.settings.organization.managed_rules, []) : item.name => item
+    if var.is_hub
+  }
+  name                        = each.value.name
+  description                 = try(each.value.description, null)
+  rule_identifier             = each.value.rule_identifier
+  excluded_accounts           = try(each.value.excluded_accounts, null)
+  input_parameters            = try(each.value.input_parameters, null)
+  maximum_execution_frequency = try(each.value.maximum_execution_frequency, null)
+  resource_id_scope           = try(each.value.resource_id_scope, null)
+  resource_types_scope        = try(each.value.resource_types_scope, null)
+  tag_key_scope               = try(each.value.tag_key_scope, null)
+  tag_value_scope             = try(each.value.tag_value_scope, null)
+}
+
+resource "aws_config_organization_custom_rule" "org_config" {
+  for_each = {
+    for item in try(var.settings.organization.custom_rules, []) : item.name => item
+    if var.is_hub
+  }
+  name                        = each.value.name
+  description                 = try(each.value.description, null)
+  lambda_function_arn         = each.value.lambda_function_arn
+  trigger_types               = try(each.value.trigger_types, ["ConfigurationItemChangeNotification"])
+  excluded_accounts           = try(each.value.excluded_accounts, null)
+  input_parameters            = try(each.value.input_parameters, null)
+  maximum_execution_frequency = try(each.value.maximum_execution_frequency, null)
+  resource_id_scope           = try(each.value.resource_id_scope, null)
+  resource_types_scope        = try(each.value.resource_types_scope, null)
+  tag_key_scope               = try(each.value.tag_key_scope, null)
+  tag_value_scope             = try(each.value.tag_value_scope, null)
+}
+
+resource "aws_config_organization_custom_policy_rule" "org_config" {
+  for_each = {
+    for item in try(var.settings.organization.custom_policy_rules, []) : item.name => item
+    if var.is_hub
+  }
+  name                        = each.value.name
+  description                 = try(each.value.description, null)
+  policy_runtime              = try(each.value.policy_runtime, "guard-2.x.x")
+  policy_text                 = each.value.policy_text
+  trigger_types               = try(each.value.trigger_types, ["ConfigurationItemChangeNotification"])
+  excluded_accounts           = try(each.value.excluded_accounts, null)
+  input_parameters            = try(each.value.input_parameters, null)
+  maximum_execution_frequency = try(each.value.maximum_execution_frequency, null)
+  resource_id_scope           = try(each.value.resource_id_scope, null)
+  resource_types_scope        = try(each.value.resource_types_scope, null)
+  tag_key_scope               = try(each.value.tag_key_scope, null)
+  tag_value_scope             = try(each.value.tag_value_scope, null)
+}
