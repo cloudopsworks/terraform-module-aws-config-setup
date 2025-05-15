@@ -92,6 +92,7 @@ resource "aws_config_configuration_aggregator" "this" {
     for_each = length(try(each.value.organization, [])) > 0 ? [1] : []
     content {
       all_regions = try(each.value.organization.all_regions, null)
+      regions     = try(each.value.organization.regions, null)
       role_arn    = aws_iam_role.config_aggregator[0].arn
     }
   }
