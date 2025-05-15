@@ -73,3 +73,27 @@ resource "aws_config_configuration_recorder_status" "this" {
 resource "aws_config_retention_configuration" "this" {
   retention_period_in_days = try(var.settings.retention_period_in_days, 365)
 }
+
+resource "aws_config_configuration_aggregator" "this" {
+  for_each = {
+    for item in try(var.settings.aggregators, []) : item.name => item
+    if var.is_hub
+  }
+  name = each.value.name
+  dynamic "account_aggregation_source" {
+    for_each = length(try(each.value.account, [])) > 0 ? [1] : []
+    content {
+      account_ids = try(each.value.account.account_ids, null)
+      all_regions = try(each.value.account.all_regions, null)
+      regions     = try(each.value.account.regions, null)
+    }
+  }
+  dynamic "organization_aggregation_source" {
+    for_each = length(try(each.value.organization, [])) > 0 ? [1] : []
+    content {
+      all_regions = try(each.value.organization.all_regions, null)
+      role_arn    = aws_iam_role.config_aggregator[0].arn
+    }
+  }
+  tags = local.all_tags
+}

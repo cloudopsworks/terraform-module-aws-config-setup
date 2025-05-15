@@ -122,3 +122,18 @@ resource "aws_iam_role_policy_attachment" "config_kms_policy" {
   role       = aws_iam_role.this[count.index].id
   policy_arn = aws_iam_policy.config_kms_policy[count.index].arn
 }
+
+resource "aws_iam_role" "config_aggregator" {
+  count              = var.is_hub ? 1 : 0
+  name               = "${local.clean_name}-org-role"
+  description        = "AWS Config role for ${local.clean_name} - Organization Access"
+  path               = "/"
+  assume_role_policy = data.aws_iam_policy_document.config_assume_role_policy[count.index].json
+  tags               = local.all_tags
+}
+
+resource "aws_iam_role_policy_attachment" "config_aggregator" {
+  count      = var.is_hub ? 1 : 0
+  role       = aws_iam_role.config_aggregator[0].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSConfigRoleForOrganizations"
+}
