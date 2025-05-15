@@ -11,7 +11,8 @@ locals {
 }
 
 resource "aws_config_configuration_recorder" "this" {
-  name = try(var.settings.custom, false) ? local.clean_name : "default"
+  count = var.is_hub ? 1 : 0
+  name  = try(var.settings.custom, false) ? local.clean_name : "default"
   role_arn = try(var.settings.service_role_arn,
     try(var.settings.service_role, false) ? aws_iam_service_linked_role.config[0].arn : aws_iam_role.this[0].arn
   )
@@ -63,7 +64,8 @@ resource "aws_config_delivery_channel" "this" {
 }
 
 resource "aws_config_configuration_recorder_status" "this" {
-  name       = aws_config_configuration_recorder.this.name
+  count      = var.is_hub ? 1 : 0
+  name       = aws_config_configuration_recorder.this[0].name
   is_enabled = try(var.settings.recorder_enabled, true)
   depends_on = [
     aws_config_delivery_channel.this
