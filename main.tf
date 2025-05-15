@@ -98,3 +98,9 @@ resource "aws_config_configuration_aggregator" "this" {
   }
   tags = local.all_tags
 }
+
+resource "aws_organizations_delegated_administrator" "this" {
+  count             = try(var.settings.organization.delegated, false) ? 1 : 0
+  account_id        = var.settings.organization.account_id
+  service_principal = "config.amazonaws.com"
+}
