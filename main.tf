@@ -64,7 +64,7 @@ resource "aws_config_delivery_channel" "this" {
 }
 
 resource "aws_config_configuration_recorder_status" "this" {
-  count      = var.is_hub ? 1 : 0
+  count      = var.is_hub || try(var.settings.create_recorder, false) ? 1 : 0
   name       = aws_config_configuration_recorder.this[0].name
   is_enabled = try(var.settings.recorder_enabled, true)
   depends_on = [
