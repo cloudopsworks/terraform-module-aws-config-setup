@@ -11,7 +11,7 @@ locals {
 }
 
 resource "aws_config_configuration_recorder" "this" {
-  count = var.is_hub ? 1 : 0
+  count = var.is_hub || try(var.settings.create_recorder, false) ? 1 : 0
   name  = try(var.settings.custom, false) ? local.clean_name : "default"
   role_arn = try(var.settings.service_role_arn,
     try(var.settings.service_role, false) ? aws_iam_service_linked_role.config[0].arn : aws_iam_role.this[0].arn
