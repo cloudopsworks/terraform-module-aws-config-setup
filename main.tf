@@ -49,11 +49,12 @@ data "aws_kms_alias" "config" {
 }
 
 resource "aws_config_delivery_channel" "this" {
+  count          = var.is_hub || try(var.settings.create_recorder, false) ? 1 : 0
   name           = try(var.settings.custom, false) ? local.clean_name : "default"
   s3_bucket_name = var.is_hub ? module.config_bucket[0].s3_bucket_id : var.settings.s3_bucket_name
   s3_key_prefix  = try(var.settings.s3_prefix, "")
   s3_kms_key_arn = var.is_hub ? aws_kms_key.config[0].arn : try(data.aws_kms_alias.config[0].target_key_arn, aws_kms_replica_key.config[0].arn, var.settings.kms.key_arn)
-  sns_topic_arn  = aws_sns_topic.config_sns.arn
+  sns_topic_arn  = aws_sns_topic.config_sns[0].arn
   snapshot_delivery_properties {
     delivery_frequency = try(var.settings.delivery_frequency, "TwentyFour_Hours")
   }
@@ -73,6 +74,7 @@ resource "aws_config_configuration_recorder_status" "this" {
 }
 
 resource "aws_config_retention_configuration" "this" {
+  count                    = var.is_hub || try(var.settings.create_recorder, false) ? 1 : 0
   retention_period_in_days = try(var.settings.retention_period_in_days, 365)
 }
 
