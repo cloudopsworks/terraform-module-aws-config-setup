@@ -1,7 +1,10 @@
 ##
-# (c) 2024 - Cloud Ops Works LLC - https://cloudops.works/
-#            On GitHub: https://github.com/cloudopsworks
-#            Distributed Under Apache v2.0 License
+# (c) 2021-2025
+#     Cloud Ops Works LLC - https://cloudops.works/
+#     Find us on:
+#       GitHub: https://github.com/cloudopsworks
+#       WebSite: https://cloudops.works
+#     Distributed Under Apache v2.0 License
 #
 
 locals {
@@ -101,12 +104,6 @@ resource "aws_config_configuration_aggregator" "this" {
     }
   }
   tags = local.all_tags
-}
-
-resource "aws_organizations_delegated_administrator" "this" {
-  count             = try(var.settings.organization.delegated, false) ? 1 : 0
-  account_id        = var.settings.organization.account_id
-  service_principal = "config.amazonaws.com"
 }
 
 resource "aws_config_organization_conformance_pack" "org_config" {
