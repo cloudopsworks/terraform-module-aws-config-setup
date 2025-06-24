@@ -1,7 +1,10 @@
 ##
-# (c) 2024 - Cloud Ops Works LLC - https://cloudops.works/
-#            On GitHub: https://github.com/cloudopsworks
-#            Distributed Under Apache v2.0 License
+# (c) 2021-2025
+#     Cloud Ops Works LLC - https://cloudops.works/
+#     Find us on:
+#       GitHub: https://github.com/cloudopsworks
+#       WebSite: https://cloudops.works
+#     Distributed Under Apache v2.0 License
 #
 
 resource "random_string" "random" {
@@ -132,5 +135,14 @@ module "config_bucket" {
       }
     ]
   }
+  lifecycle_rule = [
+    {
+      id      = "config-retention"
+      enabled = true
+      expiration = {
+        days = try(var.settings.retention_period_in_days, 365)
+      }
+    }
+  ]
   tags = local.all_tags
 }
