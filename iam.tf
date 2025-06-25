@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "config_s3_policy" {
 }
 
 data "aws_iam_policy_document" "config_sns_policy" {
-  count = var.is_hub || try(var.settings.create_recorder, false) ? 1 : 0
+  count = (var.is_hub || try(var.settings.create_recorder, false)) && try(var.settings.sns_enabled, true) ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -101,14 +101,14 @@ resource "aws_iam_role_policy_attachment" "config_s3_policy" {
 }
 
 resource "aws_iam_policy" "config_sns_policy" {
-  count  = var.is_hub || try(var.settings.create_recorder, false) ? 1 : 0
+  count  = (var.is_hub || try(var.settings.create_recorder, false)) && try(var.settings.sns_enabled, true) ? 1 : 0
   name   = "${local.clean_name}-sns-policy"
   path   = "/service-role/config.amazonaws.com/"
   policy = data.aws_iam_policy_document.config_sns_policy[count.index].json
 }
 
 resource "aws_iam_role_policy_attachment" "config_sns_policy" {
-  count      = var.is_hub || try(var.settings.create_recorder, false) ? 1 : 0
+  count      = (var.is_hub || try(var.settings.create_recorder, false)) && try(var.settings.sns_enabled, true) ? 1 : 0
   role       = aws_iam_role.this[count.index].id
   policy_arn = aws_iam_policy.config_sns_policy[count.index].arn
 }

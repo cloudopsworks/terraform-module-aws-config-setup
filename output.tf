@@ -28,11 +28,11 @@ output "config_kms_alias" {
 }
 
 output "config_sns_topic_name" {
-  value = var.is_hub || try(var.settings.create_recorder, false) ? aws_sns_topic.config_sns[0].name : null
+  value = (var.is_hub || try(var.settings.create_recorder, false)) && try(var.settings.sns_enabled, true) ? aws_sns_topic.config_sns[0].name : null
 }
 
 output "config_sns_topic_arn" {
-  value = var.is_hub || try(var.settings.create_recorder, false) ? aws_sns_topic.config_sns[0].arn : null
+  value = (var.is_hub || try(var.settings.create_recorder, false)) && try(var.settings.sns_enabled, true) ? aws_sns_topic.config_sns[0].arn : null
 }
 
 output "config_service_linked_role_arn" {

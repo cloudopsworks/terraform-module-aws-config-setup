@@ -34,6 +34,7 @@ variable "short_system_name" {
 #  custom: true | false # Use custom name for configuration recorder and delivery channel (default: false)
 #  service_role: true | false # Use service role for AWS Config (default: false)
 #  service_role_arn: "arn:aws:iam::123456789012:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig" # (required if service_role is false)
+#  sns_enabled: true | false # Enable SNS notifications for AWS Config (default: true)
 #  s3_bucket_name: "my-config-bucket" # (required if is_hub is false)
 #  s3_prefix: "config" # (optional) S3 prefix for AWS Config bucket (default: "")
 #  recording:
