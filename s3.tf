@@ -116,10 +116,12 @@ module "config_bucket" {
   object_ownership                      = "ObjectWriter"
   force_destroy                         = false
   attach_deny_insecure_transport_policy = true
+  attach_require_latest_tls_policy      = true
   block_public_acls                     = true
   block_public_policy                   = true
   ignore_public_acls                    = true
   restrict_public_buckets               = true
+  attach_public_policy                  = true
   attach_policy                         = true
   policy                                = data.aws_iam_policy_document.config_bucket_policy[0].json
   versioning = {
