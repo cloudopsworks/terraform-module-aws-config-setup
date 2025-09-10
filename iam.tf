@@ -92,6 +92,7 @@ resource "aws_iam_policy" "config_s3_policy" {
   name   = "${local.clean_name}-s3-policy"
   path   = "/service-role/config.amazonaws.com/"
   policy = data.aws_iam_policy_document.config_s3_policy[count.index].json
+  tags   = local.all_tags
 }
 
 resource "aws_iam_role_policy_attachment" "config_s3_policy" {
@@ -105,6 +106,7 @@ resource "aws_iam_policy" "config_sns_policy" {
   name   = "${local.clean_name}-sns-policy"
   path   = "/service-role/config.amazonaws.com/"
   policy = data.aws_iam_policy_document.config_sns_policy[count.index].json
+  tags   = local.all_tags
 }
 
 resource "aws_iam_role_policy_attachment" "config_sns_policy" {
@@ -118,6 +120,7 @@ resource "aws_iam_policy" "config_kms_policy" {
   name   = "${local.clean_name}-kms-policy"
   path   = "/service-role/config.amazonaws.com/"
   policy = data.aws_iam_policy_document.config_kms_policy[count.index].json
+  tags   = local.all_tags
 }
 
 resource "aws_iam_role_policy_attachment" "config_kms_policy" {
