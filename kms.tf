@@ -1,5 +1,5 @@
 ##
-# (c) 2021-2025
+# (c) 2021-2026
 #     Cloud Ops Works LLC - https://cloudops.works/
 #     Find us on:
 #       GitHub: https://github.com/cloudopsworks
@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "config_kms" {
       test     = "StringEquals"
       variable = "kms:ViaService"
       values = concat([
-        "config.${data.aws_region.current.name}.${data.aws_partition.current.dns_suffix}"
+        "config.${data.aws_region.current.id}.${data.aws_partition.current.dns_suffix}"
         ],
         try(var.settings.additional_services, [])
       )
@@ -46,7 +46,7 @@ data "aws_iam_policy_document" "config_kms" {
     principals {
       type = "AWS"
       identifiers = concat([
-        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
+        "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:root",
         ],
         try(var.settings.additional_kms_admins, [])
       )
