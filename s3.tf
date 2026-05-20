@@ -109,7 +109,7 @@ data "aws_iam_policy_document" "config_bucket_policy" {
 module "config_bucket" {
   count                                 = var.is_hub ? 1 : 0
   source                                = "terraform-aws-modules/s3-bucket/aws"
-  version                               = "~> 4.1"
+  version                               = "~> 5.13"
   bucket                                = local.bucket_name
   acl                                   = "private"
   control_object_ownership              = true
