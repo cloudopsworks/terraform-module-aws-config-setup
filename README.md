@@ -44,7 +44,7 @@ We have [*lots of terraform modules*][terraform_modules] that are Open Source an
 ## Introduction
 
 This Terraform module provides a comprehensive setup for AWS Config, enabling centralized configuration and compliance monitoring across AWS accounts. It supports:
-- Centralized S3 bucket for AWS Config logs with KMS encryption
+- Centralized S3 bucket for AWS Config logs with optional KMS encryption (SSE-S3 fallback when disabled)
 - Multi-account configuration with hub-spoke architecture
 - Customizable retention periods and access controls
 - Secure bucket policies and encryption settings
@@ -213,7 +213,8 @@ settings:
          resource_types_scope: # (optional) List of resource types to scope the managed rule
          tag_key_scope: "Environment" # (optional) Tag key scope for the managed rule
          tag_value_scope: "Production" # (optional) Tag value scope for the managed rule
-  kms: # (optional) KMS settings for encryption, will be created automatically if is_hub is true
+  kms: # (optional) KMS settings for encryption, key is created automatically if is_hub is true and enabled is true
+    enabled: true | false # (optional) Enable KMS encryption for the Config bucket and delivery channel; when false the bucket uses SSE-S3 (AES256) and no KMS key, alias, key policy or IAM KMS policy is created (default: true)
     deletion_window: 15 # (optional) KMS deletion window in days (default: 15)
     rotation_period: 90 # (optional) KMS rotation period in days (default: 90)
     multi_region: true | false # (optional) Create multi-region KMS key (default: false)
@@ -305,7 +306,7 @@ Available targets:
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.35 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.5 |
@@ -313,21 +314,21 @@ Available targets:
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.35 |
 | <a name="provider_random"></a> [random](#provider\_random) | ~> 3.5 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_config_bucket"></a> [config\_bucket](#module\_config\_bucket) | terraform-aws-modules/s3-bucket/aws | ~> 5.13 |
-| <a name="module_tags"></a> [tags](#module\_tags) | cloudopsworks/tags/local | 1.0.9 |
+| <a name="module_tags"></a> [tags](#module\_tags) | cloudopsworks/tags/local | 1.0.10 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_config_config_rule.rules](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/config_config_rule) | resource |
 | [aws_config_configuration_aggregator.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/config_configuration_aggregator) | resource |
 | [aws_config_configuration_recorder.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/config_configuration_recorder) | resource |
@@ -374,7 +375,7 @@ Available targets:
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags) | Extra tags to add to the resources | `map(string)` | `{}` | no |
 | <a name="input_is_hub"></a> [is\_hub](#input\_is\_hub) | Is this a hub or spoke configuration? | `bool` | `false` | no |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Prefix for the bucket name | `string` | `"config"` | no |
@@ -387,7 +388,7 @@ Available targets:
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_config_bucket_arn"></a> [config\_bucket\_arn](#output\_config\_bucket\_arn) | n/a |
 | <a name="output_config_bucket_name"></a> [config\_bucket\_name](#output\_config\_bucket\_name) | n/a |
 | <a name="output_config_iam_role_arn"></a> [config\_iam\_role\_arn](#output\_config\_iam\_role\_arn) | n/a |

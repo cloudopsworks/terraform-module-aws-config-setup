@@ -128,14 +128,12 @@ module "config_bucket" {
     enabled = false
   }
   server_side_encryption_configuration = {
-    rule = [
-      {
-        apply_server_side_encryption_by_default = {
-          kms_master_key_id = aws_kms_key.config[0].arn
-          sse_algorithm     = "aws:kms"
-        }
+    rule = {
+      apply_server_side_encryption_by_default = {
+        kms_master_key_id = local.kms_enabled ? aws_kms_key.config[0].arn : null
+        sse_algorithm     = local.kms_enabled ? "aws:kms" : "AES256"
       }
-    ]
+    }
   }
   lifecycle_rule = [
     {

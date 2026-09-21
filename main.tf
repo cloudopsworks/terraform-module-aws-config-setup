@@ -11,6 +11,10 @@ locals {
   clean_name  = var.short_system_name == true ? "${var.name_prefix}-config-${local.system_name_short}" : "${var.name_prefix}-config-${local.system_name}"
   bucket_name = var.random_bucket_suffix == false ? local.clean_name : "${local.clean_name}-${random_string.random[0].result}"
   sns_name    = var.short_system_name == true ? "${var.name_prefix}-config-sns-${local.system_name_short}" : "${var.name_prefix}-config-sns-${local.system_name}"
+  # KMS encryption is optional (settings.kms.enabled, default true)
+  kms_enabled         = try(var.settings.kms.enabled, true)
+  kms_key_enabled     = var.is_hub && local.kms_enabled
+  kms_replica_enabled = local.kms_enabled && var.is_hub == false && try(var.settings.kms.multi_region, false)
 }
 
 resource "aws_config_configuration_recorder" "this" {
@@ -47,7 +51,7 @@ resource "aws_config_configuration_recorder" "this" {
 }
 
 data "aws_kms_alias" "config" {
-  count = var.is_hub == false && try(var.settings.kms.alias, "") != "" ? 1 : 0
+  count = local.kms_enabled && var.is_hub == false && try(var.settings.kms.alias, "") != "" ? 1 : 0
   name  = var.settings.kms.alias
 }
 
@@ -56,7 +60,7 @@ resource "aws_config_delivery_channel" "this" {
   name           = try(var.settings.custom, false) ? local.clean_name : "default"
   s3_bucket_name = var.is_hub ? module.config_bucket[0].s3_bucket_id : var.settings.s3_bucket_name
   s3_key_prefix  = try(var.settings.s3_prefix, "")
-  s3_kms_key_arn = var.is_hub ? aws_kms_key.config[0].arn : try(data.aws_kms_alias.config[0].target_key_arn, aws_kms_replica_key.config[0].arn, var.settings.kms.key_arn)
+  s3_kms_key_arn = local.kms_enabled ? (var.is_hub ? aws_kms_key.config[0].arn : try(data.aws_kms_alias.config[0].target_key_arn, aws_kms_replica_key.config[0].arn, var.settings.kms.key_arn)) : null
   sns_topic_arn  = try(var.settings.sns_enabled, true) ? aws_sns_topic.config_sns[0].arn : null
   snapshot_delivery_properties {
     delivery_frequency = try(var.settings.delivery_frequency, "TwentyFour_Hours")

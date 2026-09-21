@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "config_sns_policy" {
 }
 
 data "aws_iam_policy_document" "config_kms_policy" {
-  count = var.is_hub ? 1 : 0
+  count = local.kms_key_enabled ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
@@ -116,7 +116,7 @@ resource "aws_iam_role_policy_attachment" "config_sns_policy" {
 }
 
 resource "aws_iam_policy" "config_kms_policy" {
-  count  = var.is_hub ? 1 : 0
+  count  = local.kms_key_enabled ? 1 : 0
   name   = "${local.clean_name}-kms-policy"
   path   = "/service-role/config.amazonaws.com/"
   policy = data.aws_iam_policy_document.config_kms_policy[count.index].json
@@ -124,7 +124,7 @@ resource "aws_iam_policy" "config_kms_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "config_kms_policy" {
-  count      = var.is_hub ? 1 : 0
+  count      = local.kms_key_enabled ? 1 : 0
   role       = aws_iam_role.this[count.index].id
   policy_arn = aws_iam_policy.config_kms_policy[count.index].arn
 }
