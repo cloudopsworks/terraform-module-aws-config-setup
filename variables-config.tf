@@ -120,7 +120,8 @@ variable "short_system_name" {
 #         resource_types_scope: # (optional) List of resource types to scope the managed rule
 #         tag_key_scope: "Environment" # (optional) Tag key scope for the managed rule
 #         tag_value_scope: "Production" # (optional) Tag value scope for the managed rule
-#  kms: # (optional) KMS settings for encryption, will be created automatically if is_hub is true
+#  kms: # (optional) KMS settings for encryption, key is created automatically if is_hub is true and enabled is true
+#    enabled: true | false # (optional) Enable KMS encryption for the Config bucket and delivery channel; when false the bucket uses SSE-S3 (AES256) and no KMS key, alias, key policy or IAM KMS policy is created (default: true)
 #    deletion_window: 15 # (optional) KMS deletion window in days (default: 15)
 #    rotation_period: 90 # (optional) KMS rotation period in days (default: 90)
 #    multi_region: true | false # (optional) Create multi-region KMS key (default: false)

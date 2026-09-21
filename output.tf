@@ -16,15 +16,15 @@ output "config_bucket_arn" {
 }
 
 output "config_kms_key_arn" {
-  value = var.is_hub ? aws_kms_key.config[0].arn : null
+  value = local.kms_key_enabled ? aws_kms_key.config[0].arn : null
 }
 
 output "config_kms_key_id" {
-  value = var.is_hub ? aws_kms_key.config[0].key_id : null
+  value = local.kms_key_enabled ? aws_kms_key.config[0].key_id : null
 }
 
 output "config_kms_alias" {
-  value = var.is_hub ? aws_kms_alias.config[0].name : null
+  value = local.kms_key_enabled ? aws_kms_alias.config[0].name : null
 }
 
 output "config_sns_topic_name" {
